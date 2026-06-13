@@ -5,9 +5,10 @@ import { LogOut } from "./Icons";
 
 interface NavbarProps {
   showDemoBadge?: boolean;
+  onNavigate?: (sectionId: string) => void;
 }
 
-export function Navbar({ showDemoBadge }: NavbarProps) {
+export function Navbar({ showDemoBadge, onNavigate }: NavbarProps) {
   const { user, loading, configured, displayName, signOut } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
 
@@ -16,7 +17,11 @@ export function Navbar({ showDemoBadge }: NavbarProps) {
       <header className="sticky top-0 z-40">
         <div className="absolute inset-0 -z-10 border-b border-white/[0.04] bg-forest-950/40 backdrop-blur-xl backdrop-saturate-150" />
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3.5">
-          <a href="#" className="group flex items-center gap-3">
+          <a
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="group flex items-center gap-3"
+          >
             {/* logomark — abstract sprouting leaf set in a glass disc */}
             <span className="relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-forest-700 to-forest-900">
               <span className="absolute inset-0 bg-gradient-to-tr from-glow-400/30 via-transparent to-aurora-cyan/20" />
@@ -45,9 +50,12 @@ export function Navbar({ showDemoBadge }: NavbarProps) {
           </a>
 
           <nav className="hidden items-center gap-1 md:flex">
-            <NavLink>How it works</NavLink>
-            <NavLink>Scoring</NavLink>
-            <NavLink>About</NavLink>
+            <NavLink sectionId="how-it-works" onNavigate={onNavigate}>
+              How it works
+            </NavLink>
+            <NavLink sectionId="scoring" onNavigate={onNavigate}>
+              Scoring
+            </NavLink>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -97,13 +105,22 @@ export function Navbar({ showDemoBadge }: NavbarProps) {
   );
 }
 
-function NavLink({ children }: { children: React.ReactNode }) {
+function NavLink({
+  children,
+  sectionId,
+  onNavigate,
+}: {
+  children: React.ReactNode;
+  sectionId: string;
+  onNavigate?: (sectionId: string) => void;
+}) {
   return (
-    <a
-      href="#"
+    <button
+      type="button"
+      onClick={() => onNavigate?.(sectionId)}
       className="rounded-full px-3 py-1.5 text-sm text-forest-100/65 transition hover:bg-white/[0.04] hover:text-forest-50"
     >
       {children}
-    </a>
+    </button>
   );
 }

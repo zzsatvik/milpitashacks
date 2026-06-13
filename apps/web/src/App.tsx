@@ -1,9 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LawnAnalysis } from "@lawn-audit/shared";
 import { AnalyzingScreen } from "./components/AnalyzingScreen";
 import { AuditHistory } from "./components/AuditHistory";
 import { AuditResults } from "./components/AuditResults";
 import { Hero } from "./components/Hero";
+import { ScoringSection } from "./components/InfoSections";
 import { Navbar } from "./components/Navbar";
 import { PhotoUpload } from "./components/PhotoUpload";
 import { Aperture, Layers, Idea, Sparkles } from "./components/Icons";
@@ -23,7 +24,17 @@ function App() {
   const [analysis, setAnalysis] = useState<LawnAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedReplay, setSavedReplay] = useState(false);
+  const [pendingScroll, setPendingScroll] = useState<string | null>(null);
   const uploadRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (phase !== "landing" || !pendingScroll) return;
+    const el = document.getElementById(pendingScroll);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setPendingScroll(null);
+    }
+  }, [phase, pendingScroll]);
 
   const runAnalysis = useCallback(
     async (dataUrl: string) => {
@@ -98,9 +109,28 @@ function App() {
     uploadRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  const handleNavSection = useCallback(
+    (sectionId: string) => {
+      if (phase !== "landing") {
+        setPhase("landing");
+        setImageUrl(null);
+        setAnalysis(null);
+        setError(null);
+        setSavedReplay(false);
+        setPendingScroll(sectionId);
+        window.scrollTo({ top: 0, behavior: "auto" });
+        return;
+      }
+      document
+        .getElementById(sectionId)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    [phase],
+  );
+
   return (
     <div className="app-shell min-h-screen">
-      <Navbar showDemoBadge={USE_MOCK} />
+      <Navbar showDemoBadge={USE_MOCK} onNavigate={handleNavSection} />
 
       <main>
         {phase === "landing" && (
@@ -154,7 +184,10 @@ function App() {
             </section>
 
             {/* Process explainer — three bento cards, no emojis */}
-            <section className="mx-auto max-w-6xl px-6 py-14">
+            <section
+              id="how-it-works"
+              className="scroll-mt-24 mx-auto max-w-6xl px-6 py-14"
+            >
               <div className="mb-10 text-center">
                 <div className="inline-flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
                   <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
@@ -186,6 +219,8 @@ function App() {
                 />
               </div>
             </section>
+
+            <ScoringSection />
 
             <div className="mx-auto max-w-6xl px-6">
               <AuditHistory onLoadAudit={handleLoadSavedAudit} />
