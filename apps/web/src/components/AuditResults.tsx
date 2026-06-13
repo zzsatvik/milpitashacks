@@ -1,39 +1,56 @@
 import type { LawnAnalysis } from "@lawn-audit/shared";
 import { useMemo, useState } from "react";
+import { exportAuditPdf } from "../lib/exportPdf";
 import { LawnCanvas } from "./LawnCanvas";
 import { Scorecard } from "./Scorecard";
 import { SwapSuggestionsList } from "./SwapSuggestionsList";
 import { ZoneDetailPanel } from "./ZoneDetailPanel";
-import { ArrowLeft } from "./Icons";
+import { ArrowLeft, Compass } from "./Icons";
 import type { ViewTab } from "../types";
 
 interface AuditResultsProps {
   imageUrl: string;
   analysis: LawnAnalysis;
+  zipCode?: string;
   onStartOver: () => void;
 }
 
 export function AuditResults({
   imageUrl,
   analysis,
+  zipCode,
   onStartOver,
 }: AuditResultsProps) {
   const [activeTab, setActiveTab] = useState<ViewTab>("before");
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const selectedZone = useMemo(
     () => analysis.zones.find((z) => z.id === selectedZoneId) ?? null,
     [analysis.zones, selectedZoneId],
   );
 
+  const handleExportPdf = () => {
+    setExporting(true);
+    try {
+      exportAuditPdf(analysis, zipCode ?? analysis.location?.zip_code);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="animate-fade-up space-y-7 pb-20 pt-6">
-      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
             <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
             Audit&nbsp;·&nbsp;{analysis.zones.length} zones
+            {(analysis.location?.zip_code ?? zipCode) && (
+              <>
+                &nbsp;·&nbsp;ZIP {analysis.location?.zip_code ?? zipCode}
+              </>
+            )}
           </div>
           <h2 className="mt-1.5 font-display text-3xl tracking-tight-display text-forest-50">
             Your yard, decoded
@@ -41,20 +58,59 @@ export function AuditResults({
           <p className="mt-1 text-sm text-forest-100/55">
             {activeTab === "before"
               ? "Tap any overlay to inspect a zone in detail."
-              : "Each number matches a recommendation below."}
+              : "Expand rows for shopping lists, stores, and step-by-step plans."}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onStartOver}
-          className="glass inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-forest-100/85 transition hover:border-glow-400/25 hover:text-forest-50"
-        >
-          <ArrowLeft size={14} strokeWidth={2} />
-          New audit
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            disabled={exporting}
+            className="glass inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-forest-100/85 transition hover:border-glow-400/25 hover:text-forest-50 disabled:opacity-50"
+          >
+            {exporting ? "Exporting…" : "Export PDF"}
+          </button>
+          <button
+            type="button"
+            onClick={onStartOver}
+            className="glass inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-forest-100/85 transition hover:border-glow-400/25 hover:text-forest-50"
+          >
+            <ArrowLeft size={14} strokeWidth={2} />
+            New audit
+          </button>
+        </div>
       </div>
 
-      {/* Tab switcher — glass pills */}
+      {(analysis.location || analysis.regional_tips?.length) && (
+        <div className="glass-subtle rounded-2xl p-4">
+          {analysis.location && (
+            <div className="flex items-start gap-2">
+              <Compass size={16} className="mt-0.5 shrink-0 text-glow-400" strokeWidth={1.8} />
+              <div>
+                <p className="text-sm font-medium text-forest-50">
+                  Localized for {analysis.location.region_hint ?? `ZIP ${analysis.location.zip_code}`}
+                </p>
+                {analysis.location.climate_note && (
+                  <p className="mt-0.5 text-sm text-forest-100/60">
+                    {analysis.location.climate_note}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+          {analysis.regional_tips && analysis.regional_tips.length > 0 && (
+            <ul className={`space-y-1.5 text-sm text-forest-100/65 ${analysis.location ? "mt-3 border-t border-white/6 pt-3" : ""}`}>
+              {analysis.regional_tips.map((tip) => (
+                <li key={tip} className="flex gap-2">
+                  <span className="text-glow-400">—</span>
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       <div className="glass-subtle inline-flex w-full rounded-2xl p-1 sm:w-auto">
         {(["before", "after"] as const).map((tab) => (
           <button

@@ -16,8 +16,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Expected { image: data URL }" });
   }
 
+  const zipCode =
+    typeof req.body?.zipCode === "string" && req.body.zipCode.trim()
+      ? req.body.zipCode.trim().slice(0, 10)
+      : undefined;
+
   try {
-    const result = await callOpenAiAnalyze(image, apiKey);
+    const result = await callOpenAiAnalyze(image, apiKey, zipCode);
     return res.status(200).json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Analysis failed";

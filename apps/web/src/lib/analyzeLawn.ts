@@ -4,11 +4,15 @@ const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 export async function analyzeLawnImage(
   imageDataUrl: string,
+  zipCode?: string,
 ): Promise<LawnAnalysis> {
   const response = await fetch(`${API_BASE}/api/analyze`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: imageDataUrl }),
+    body: JSON.stringify({
+      image: imageDataUrl,
+      ...(zipCode ? { zipCode } : {}),
+    }),
   });
 
   if (!response.ok) {

@@ -1,5 +1,6 @@
 import type { LawnZone } from "@lawn-audit/shared";
 import { SEVERITY_COLORS } from "@lawn-audit/shared";
+import { ActionPlanDetails } from "./ActionPlanDetails";
 import { Close, Droplet, Sprout } from "./Icons";
 
 interface ZoneDetailPanelProps {
@@ -62,6 +63,8 @@ export function ZoneDetailPanel({ zone, onClose }: ZoneDetailPanelProps) {
             </div>
           )}
         </div>
+
+        {zone.action_plan && <ActionPlanDetails plan={zone.action_plan} />}
       </div>
     </div>
   );

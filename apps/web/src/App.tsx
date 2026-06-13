@@ -7,11 +7,13 @@ import { Hero } from "./components/Hero";
 import { ScoringSection } from "./components/InfoSections";
 import { Navbar } from "./components/Navbar";
 import { PhotoUpload } from "./components/PhotoUpload";
+import { ZipCodeField } from "./components/ZipCodeField";
 import { Aperture, Layers, Idea, Sparkles } from "./components/Icons";
 import { useAuth } from "./contexts/AuthContext";
 import { analyzeLawnImage, urlToDataUrl } from "./lib/analyzeLawn";
 import { saveAudit } from "./lib/audits";
-import { MOCK_ANALYSIS } from "./lib/mockAnalysis";
+import { isValidZipCode, normalizeZipCode, getStoredZipCode } from "./lib/location";
+import { buildMockAnalysis } from "./lib/mockAnalysis";
 import type { AppPhase } from "./types";
 import { useMockMode } from "./lib/env";
 
@@ -25,6 +27,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [savedReplay, setSavedReplay] = useState(false);
   const [pendingScroll, setPendingScroll] = useState<string | null>(null);
+  const [zipCode, setZipCode] = useState(getStoredZipCode);
   const uploadRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,18 +40,20 @@ function App() {
   }, [phase, pendingScroll]);
 
   const runAnalysis = useCallback(
-    async (dataUrl: string) => {
+    async (dataUrl: string, zip?: string) => {
       setPhase("analyzing");
       setError(null);
       setSavedReplay(false);
+
+      const zipForAnalysis = zip && isValidZipCode(zip) ? normalizeZipCode(zip) : undefined;
 
       try {
         let result: LawnAnalysis;
         if (USE_MOCK) {
           await new Promise((r) => setTimeout(r, 2500));
-          result = MOCK_ANALYSIS;
+          result = buildMockAnalysis(zipForAnalysis ?? "95035");
         } else {
-          result = await analyzeLawnImage(dataUrl);
+          result = await analyzeLawnImage(dataUrl, zipForAnalysis);
         }
 
         setAnalysis(result);
@@ -65,24 +70,39 @@ function App() {
     [user],
   );
 
+  const startAnalysis = useCallback(
+    (dataUrl: string) => {
+      if (!isValidZipCode(zipCode)) {
+        setError("Enter a valid 5-digit ZIP code before running an audit");
+        return;
+      }
+      setError(null);
+      setImageUrl(dataUrl);
+      runAnalysis(dataUrl, zipCode);
+    },
+    [runAnalysis, zipCode],
+  );
+
   const handleUpload = useCallback(
     (_file: File, dataUrl: string) => {
-      setImageUrl(dataUrl);
-      runAnalysis(dataUrl);
+      startAnalysis(dataUrl);
     },
-    [runAnalysis],
+    [startAnalysis],
   );
 
   const handleTryDemo = useCallback(async () => {
+    if (!isValidZipCode(zipCode)) {
+      setError("Enter a valid 5-digit ZIP code before running an audit");
+      return;
+    }
     setError(null);
     try {
       const dataUrl = await urlToDataUrl("/demo-yard.jpg");
-      setImageUrl(dataUrl);
-      runAnalysis(dataUrl);
+      startAnalysis(dataUrl);
     } catch {
       setError("Could not load demo photo");
     }
-  }, [runAnalysis]);
+  }, [startAnalysis, zipCode]);
 
   const handleLoadSavedAudit = useCallback(async (saved: LawnAnalysis) => {
     setAnalysis(saved);
@@ -156,7 +176,11 @@ function App() {
                 </p>
               </div>
 
-              <PhotoUpload onUpload={handleUpload} />
+              <div className="mb-5">
+                <ZipCodeField value={zipCode} onChange={setZipCode} required />
+              </div>
+
+              <PhotoUpload onUpload={handleUpload} disabled={!isValidZipCode(zipCode)} />
 
               <div className="mt-5 flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/8" />
@@ -169,7 +193,8 @@ function App() {
               <button
                 type="button"
                 onClick={handleTryDemo}
-                className="glass-subtle group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-medium text-forest-100/85 transition hover:border-glow-400/30 hover:text-forest-50"
+                disabled={!isValidZipCode(zipCode)}
+                className="glass-subtle group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-medium text-forest-100/85 transition hover:border-glow-400/30 hover:text-forest-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Sparkles size={15} className="text-glow-400" strokeWidth={1.8} />
                 Run on a sample yard
@@ -247,6 +272,7 @@ function App() {
             <AuditResults
               imageUrl={imageUrl}
               analysis={analysis}
+              zipCode={zipCode}
               onStartOver={handleStartOver}
             />
           </div>

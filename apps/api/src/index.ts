@@ -31,7 +31,7 @@ app.post("/api/analyze", async (c) => {
     return c.json({ error: "OPENAI_API_KEY not configured on server" }, 500);
   }
 
-  let body: { image?: string };
+  let body: { image?: string; zipCode?: string };
   try {
     body = await c.req.json();
   } catch {
@@ -42,8 +42,13 @@ app.post("/api/analyze", async (c) => {
     return c.json({ error: "Expected { image: data URL }" }, 400);
   }
 
+  const zipCode =
+    typeof body.zipCode === "string" && body.zipCode.trim()
+      ? body.zipCode.trim().slice(0, 10)
+      : undefined;
+
   try {
-    const result = await callOpenAiAnalyze(body.image, apiKey);
+    const result = await callOpenAiAnalyze(body.image, apiKey, zipCode);
     return c.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Analysis failed";

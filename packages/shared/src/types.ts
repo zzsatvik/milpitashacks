@@ -9,6 +9,25 @@ export interface BoundingBox {
   height: number;
 }
 
+export interface PurchaseItem {
+  name: string;
+  quantity?: string;
+  purpose: string;
+}
+
+export interface StoreOption {
+  store_name: string;
+  distance?: string;
+  address_hint?: string;
+  notes?: string;
+}
+
+export interface ZoneActionPlan {
+  steps: string[];
+  items: PurchaseItem[];
+  where_to_buy: StoreOption[];
+}
+
 export interface LawnZone {
   id: number;
   label: string;
@@ -19,6 +38,7 @@ export interface LawnZone {
   water_impact?: string;
   co2_impact?: string;
   after_suggestion?: string;
+  action_plan?: ZoneActionPlan;
 }
 
 export interface LawnScores {
@@ -32,10 +52,18 @@ export interface LawnScores {
   potential_co2_sequestration_lbs?: number;
 }
 
+export interface LawnLocationContext {
+  zip_code: string;
+  region_hint?: string;
+  climate_note?: string;
+}
+
 export interface LawnAnalysis {
   zones: LawnZone[];
   scores: LawnScores;
   summary: string;
+  location?: LawnLocationContext;
+  regional_tips?: string[];
 }
 
 export const SEVERITY_COLORS: Record<
