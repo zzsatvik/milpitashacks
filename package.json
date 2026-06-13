@@ -1,0 +1,22 @@
+{
+  "name": "lawn-audit",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:all",
+    "dev:web": "npm run dev --workspace=@lawn-audit/web",
+    "dev:api": "npm run dev --workspace=@lawn-audit/api",
+    "dev:all": "concurrently -n web,api -c green,blue \"npm run dev:web\" \"npm run dev:api\"",
+    "build": "npm run build --workspace=@lawn-audit/web",
+    "preview": "npm run preview --workspace=@lawn-audit/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
