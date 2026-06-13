@@ -1,22 +1,31 @@
 import { useState } from "react";
-import type { LawnZone } from "@terraview/shared";
+import type { LawnAnalysis, LawnZone, SwapRoi } from "@terraview/shared";
 import { SEVERITY_COLORS } from "@terraview/shared";
 import { ActionPlanDetails } from "./ActionPlanDetails";
+import { ContractorEstimatePanel } from "./ContractorEstimatePanel";
+import { SwapRoiCard } from "./SwapRoiCard";
 import { ChevronRight, Droplet, Sprout } from "./Icons";
 
 interface SwapSuggestionsListProps {
   zones: LawnZone[];
+  analysis: LawnAnalysis;
+  zipCode: string;
+  swapRois: SwapRoi[];
   selectedZoneId: number | null;
   onZoneSelect: (zoneId: number | null) => void;
 }
 
 export function SwapSuggestionsList({
   zones,
+  analysis,
+  zipCode,
+  swapRois,
   selectedZoneId,
   onZoneSelect,
 }: SwapSuggestionsListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const sorted = [...zones].sort((a, b) => a.id - b.id);
+  const roiByZone = new Map(swapRois.map((r) => [r.zone_id, r]));
 
   const toggleExpanded = (zoneId: number) => {
     setExpandedIds((prev) => {
@@ -37,7 +46,7 @@ export function SwapSuggestionsList({
         Make these moves first
       </h3>
       <p className="mt-1 text-sm text-forest-100/55">
-        Expand any row for shopping list, stores, and step-by-step instructions
+        Expand any row for ROI, shopping list, stores, and cost estimates
       </p>
 
       <ol className="mt-5 space-y-2.5">
@@ -47,6 +56,7 @@ export function SwapSuggestionsList({
           const isExpanded = expandedIds.has(zone.id);
           const suggestion = zone.after_suggestion ?? zone.recommendation;
           const hasPlan = Boolean(zone.action_plan);
+          const roi = roiByZone.get(zone.id);
 
           return (
             <li key={zone.id}>
@@ -114,7 +124,9 @@ export function SwapSuggestionsList({
                       </span>
                     </div>
 
-                    {hasPlan && (
+                    {roi && !isExpanded && <SwapRoiCard roi={roi} />}
+
+                    {(hasPlan || roi) && (
                       <button
                         type="button"
                         onClick={() => toggleExpanded(zone.id)}
@@ -126,15 +138,21 @@ export function SwapSuggestionsList({
                           strokeWidth={2}
                           className={`transition-transform ${isExpanded ? "rotate-90" : ""}`}
                         />
-                        {isExpanded ? "Hide details" : "View shopping list & steps"}
+                        {isExpanded ? "Hide details" : "View ROI, costs & action plan"}
                       </button>
                     )}
                   </div>
                 </div>
 
-                {isExpanded && zone.action_plan && (
+                {isExpanded && (
                   <div className="border-t border-white/6 px-4 pb-4 pt-0">
-                    <ActionPlanDetails plan={zone.action_plan} />
+                    {roi && <SwapRoiCard roi={roi} />}
+                    {zone.action_plan && <ActionPlanDetails plan={zone.action_plan} />}
+                    <ContractorEstimatePanel
+                      zone={zone}
+                      analysis={analysis}
+                      zipCode={zipCode}
+                    />
                   </div>
                 )}
               </div>

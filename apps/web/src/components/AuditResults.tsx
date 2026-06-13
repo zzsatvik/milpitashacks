@@ -1,9 +1,15 @@
-import type { LawnAnalysis } from "@terraview/shared";
-import { useMemo, useState } from "react";
+import type { AuditInsights, LawnAnalysis } from "@terraview/shared";
+import { buildMockInsights } from "@terraview/shared";
+import { useEffect, useMemo, useState } from "react";
 import { exportAuditPdf } from "../lib/exportPdf";
+import { fetchAuditInsights } from "../lib/auditFeatures";
+import { useMockMode } from "../lib/env";
+import { AuditChatFab, AuditChatPanel } from "./AuditChatPanel";
 import { LawnCanvas } from "./LawnCanvas";
 import { Scorecard } from "./Scorecard";
+import { SeasonalProjectionChart } from "./SeasonalProjectionChart";
 import { SwapSuggestionsList } from "./SwapSuggestionsList";
+import { WaterBillEstimator } from "./WaterBillEstimator";
 import { ZoneDetailPanel } from "./ZoneDetailPanel";
 import { ArrowLeft, Compass } from "./Icons";
 import type { ViewTab } from "../types";
@@ -21,9 +27,47 @@ export function AuditResults({
   zipCode,
   onStartOver,
 }: AuditResultsProps) {
+  const USE_MOCK = useMockMode();
+  const effectiveZip = zipCode ?? analysis.location?.zip_code ?? "";
+
   const [activeTab, setActiveTab] = useState<ViewTab>("before");
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [insights, setInsights] = useState<AuditInsights | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(true);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!effectiveZip || !/^\d{5}$/.test(effectiveZip)) {
+      setInsightsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setInsightsLoading(true);
+    setInsightsError(null);
+
+    (async () => {
+      try {
+        const data = USE_MOCK
+          ? buildMockInsights(analysis, effectiveZip)
+          : await fetchAuditInsights(analysis, effectiveZip);
+        if (!cancelled) setInsights(data);
+      } catch (err) {
+        if (!cancelled) {
+          setInsightsError(err instanceof Error ? err.message : "Insights unavailable");
+          setInsights(buildMockInsights(analysis, effectiveZip));
+        }
+      } finally {
+        if (!cancelled) setInsightsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [analysis, effectiveZip, USE_MOCK]);
 
   const selectedZone = useMemo(
     () => analysis.zones.find((z) => z.id === selectedZoneId) ?? null,
@@ -33,32 +77,28 @@ export function AuditResults({
   const handleExportPdf = async () => {
     setExporting(true);
     try {
-      await exportAuditPdf(analysis, zipCode ?? analysis.location?.zip_code, imageUrl);
+      await exportAuditPdf(analysis, effectiveZip || undefined, imageUrl);
     } finally {
       setExporting(false);
     }
   };
 
   return (
-    <div className="animate-fade-up space-y-7 pb-20 pt-6">
+    <div className="animate-fade-up space-y-7 pb-24 pt-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
             <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
             Audit&nbsp;·&nbsp;{analysis.zones.length} zones
-            {(analysis.location?.zip_code ?? zipCode) && (
-              <>
-                &nbsp;·&nbsp;ZIP {analysis.location?.zip_code ?? zipCode}
-              </>
-            )}
+            {effectiveZip && <> &nbsp;·&nbsp;ZIP {effectiveZip}</>}
           </div>
           <h2 className="mt-1.5 font-display text-3xl tracking-tight-display text-forest-50">
             Your yard, decoded
           </h2>
           <p className="mt-1 text-sm text-forest-100/55">
             {activeTab === "before"
-              ? "Tap any overlay to inspect a zone in detail."
-              : "Expand rows for shopping lists, stores, and step-by-step plans."}
+              ? "Tap a zone to inspect it or identify plants."
+              : "Expand swaps for ROI, costs, and step-by-step plans."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -111,6 +151,20 @@ export function AuditResults({
         </div>
       )}
 
+      {insightsLoading ? (
+        <div className="glass-subtle h-48 animate-pulse rounded-3xl" />
+      ) : insights ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SeasonalProjectionChart projection={insights.seasonal} />
+          <WaterBillEstimator analysis={analysis} benchmark={insights.zip_benchmark} />
+        </div>
+      ) : null}
+      {insightsError && (
+        <p className="text-xs text-forest-100/40">
+          Live insights unavailable ({insightsError}) — showing estimates.
+        </p>
+      )}
+
       <div className="glass-subtle inline-flex w-full rounded-2xl p-1 sm:w-auto">
         {(["before", "after"] as const).map((tab) => (
           <button
@@ -154,12 +208,17 @@ export function AuditResults({
               </div>
               <ZoneDetailPanel
                 zone={selectedZone}
+                imageUrl={imageUrl}
+                zipCode={effectiveZip}
                 onClose={() => setSelectedZoneId(null)}
               />
             </>
           ) : (
             <SwapSuggestionsList
               zones={analysis.zones}
+              analysis={analysis}
+              zipCode={effectiveZip}
+              swapRois={insights?.swap_rois ?? []}
               selectedZoneId={selectedZoneId}
               onZoneSelect={setSelectedZoneId}
             />
@@ -168,6 +227,15 @@ export function AuditResults({
 
         <Scorecard scores={analysis.scores} summary={analysis.summary} />
       </div>
+
+      {!chatOpen && <AuditChatFab onClick={() => setChatOpen(true)} />}
+      <AuditChatPanel
+        analysis={analysis}
+        zipCode={effectiveZip || undefined}
+        insights={insights}
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
     </div>
   );
 }

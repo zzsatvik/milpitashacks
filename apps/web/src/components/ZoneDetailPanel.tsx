@@ -1,14 +1,22 @@
 import type { LawnZone } from "@terraview/shared";
 import { SEVERITY_COLORS } from "@terraview/shared";
 import { ActionPlanDetails } from "./ActionPlanDetails";
+import { PlantIdPanel } from "./PlantIdPanel";
 import { Close, Droplet, Sprout } from "./Icons";
 
 interface ZoneDetailPanelProps {
   zone: LawnZone | null;
+  imageUrl: string;
+  zipCode: string;
   onClose: () => void;
 }
 
-export function ZoneDetailPanel({ zone, onClose }: ZoneDetailPanelProps) {
+export function ZoneDetailPanel({
+  zone,
+  imageUrl,
+  zipCode,
+  onClose,
+}: ZoneDetailPanelProps) {
   if (!zone) return null;
 
   const colors = SEVERITY_COLORS[zone.severity];
@@ -63,6 +71,8 @@ export function ZoneDetailPanel({ zone, onClose }: ZoneDetailPanelProps) {
             </div>
           )}
         </div>
+
+        <PlantIdPanel zone={zone} imageUrl={imageUrl} zipCode={zipCode} />
 
         {zone.action_plan && <ActionPlanDetails plan={zone.action_plan} />}
       </div>
