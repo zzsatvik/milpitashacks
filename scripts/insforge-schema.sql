@@ -1,5 +1,5 @@
 -- Run this in your InsForge dashboard (SQL editor / Database section)
--- Creates the table for saving lawn audit results per user
+-- Creates the table for saving Terraview audit results per user
 
 CREATE TABLE IF NOT EXISTS lawn_audits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

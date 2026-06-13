@@ -1,5 +1,5 @@
 {
-  "name": "lawn-audit",
+  "name": "terraview",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -7,11 +7,11 @@
   ],
   "scripts": {
     "dev": "npm run dev:all",
-    "dev:web": "npm run dev --workspace=@lawn-audit/web",
-    "dev:api": "npm run dev --workspace=@lawn-audit/api",
+    "dev:web": "npm run dev --workspace=@terraview/web",
+    "dev:api": "npm run dev --workspace=@terraview/api",
     "dev:all": "concurrently -n web,api -c green,blue \"npm run dev:web\" \"npm run dev:api\"",
-    "build": "npm run build --workspace=@lawn-audit/web",
-    "preview": "npm run preview --workspace=@lawn-audit/web"
+    "build": "npm run build --workspace=@terraview/web",
+    "preview": "npm run preview --workspace=@terraview/web"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

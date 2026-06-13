@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { LawnAnalysis } from "@lawn-audit/shared";
+import type { LawnAnalysis } from "@terraview/shared";
 import { AnalyzingScreen } from "./components/AnalyzingScreen";
 import { AuditHistory } from "./components/AuditHistory";
 import { AuditResults } from "./components/AuditResults";
@@ -315,7 +315,7 @@ function Footer() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
           <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
-          Lawn.Audit&nbsp;·&nbsp;Built for measurable biodiversity
+          Terraview&nbsp;·&nbsp;Built for measurable biodiversity
         </div>
         <div className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/30">
           v0.1

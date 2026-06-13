@@ -1,4 +1,4 @@
-const STORAGE_KEY = "lawn-audit-zip";
+const STORAGE_KEY = "terraview-zip";
 
 export function getStoredZipCode(): string {
   try {

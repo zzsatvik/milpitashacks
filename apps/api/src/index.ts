@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { callOpenAiAnalyze } from "@lawn-audit/shared";
+import { callOpenAiAnalyze } from "@terraview/shared";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 config({ path: path.join(rootDir, ".env") });
@@ -58,6 +58,6 @@ app.post("/api/analyze", async (c) => {
 
 const port = Number(process.env.PORT ?? 3001);
 
-console.log(`Lawn Audit API running on http://localhost:${port}`);
+console.log(`Terraview API running on http://localhost:${port}`);
 
 serve({ fetch: app.fetch, port });

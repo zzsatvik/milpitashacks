@@ -1,28 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Layers, Droplet, Sprout, Sun, Sparkles } from "./Icons";
+import {
+  HERO_DEMO_SCORES,
+  HERO_DEMO_ZONES,
+  type HeroDemoZone,
+} from "../lib/heroDemoZones";
 
 interface HeroProps {
   onUploadClick: () => void;
   onTryDemo: () => void;
 }
-
-interface DetectedZone {
-  id: number;
-  x: number;       // percent
-  y: number;       // percent
-  w: number;       // percent
-  h: number;       // percent
-  label: string;
-  severity: "high" | "moderate" | "good";
-  metric: string;
-}
-
-const DEMO_ZONES: DetectedZone[] = [
-  { id: 1, x: 8,  y: 12, w: 36, h: 28, label: "Turf grass",      severity: "high",     metric: "63% water draw" },
-  { id: 2, x: 50, y: 8,  w: 30, h: 22, label: "Bare soil",       severity: "high",     metric: "erosion risk" },
-  { id: 3, x: 12, y: 50, w: 28, h: 30, label: "Hardscape",       severity: "moderate", metric: "+4°F heat" },
-  { id: 4, x: 56, y: 46, w: 36, h: 36, label: "Native bed",      severity: "good",     metric: "pollinator zone" },
-];
 
 const SEVERITY = {
   high:     { ring: "rgba(248, 113, 113, 0.95)", fill: "rgba(248, 113, 113, 0.10)" },
@@ -64,7 +51,7 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
     };
   }, []);
 
-  const insideZone = (z: DetectedZone) =>
+  const insideZone = (z: HeroDemoZone) =>
     pointer.x >= z.x && pointer.x <= z.x + z.w &&
     pointer.y >= z.y && pointer.y <= z.y + z.h;
 
@@ -184,7 +171,7 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
             <CornerBrackets />
 
             {/* zone overlays */}
-            {DEMO_ZONES.map((z) => {
+            {HERO_DEMO_ZONES.map((z) => {
               const active = insideZone(z);
               const c = SEVERITY[z.severity];
               return (
@@ -248,7 +235,9 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
               style={{ background: "rgba(10, 20, 16, 0.55)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <div className="text-forest-100/50">Detected</div>
-              <div className="font-semibold tabular text-glow-300">4 zones</div>
+              <div className="font-semibold tabular text-glow-300">
+                {HERO_DEMO_ZONES.length} zones
+              </div>
             </div>
           </div>
 
@@ -262,7 +251,10 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
             <Droplet size={14} className="text-aurora-cyan" strokeWidth={2} />
             <div>
               <div className="font-mono-data text-[10px] uppercase tracking-wider text-forest-100/50">Water</div>
-              <div className="font-display text-base text-forest-50">38<span className="text-forest-100/40">/100</span></div>
+              <div className="font-display text-base text-forest-50">
+                {HERO_DEMO_SCORES.water}
+                <span className="text-forest-100/40">/100</span>
+              </div>
             </div>
           </FloatingChip>
 
@@ -275,7 +267,10 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
             <Sprout size={14} className="text-glow-400" strokeWidth={2} />
             <div>
               <div className="font-mono-data text-[10px] uppercase tracking-wider text-forest-100/50">Biodiv.</div>
-              <div className="font-display text-base text-forest-50">41<span className="text-forest-100/40">/100</span></div>
+              <div className="font-display text-base text-forest-50">
+                {HERO_DEMO_SCORES.biodiversity}
+                <span className="text-forest-100/40">/100</span>
+              </div>
             </div>
           </FloatingChip>
 
@@ -288,7 +283,9 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
             <Sun size={14} className="text-aurora-amber" strokeWidth={2} />
             <div>
               <div className="font-mono-data text-[10px] uppercase tracking-wider text-forest-100/50">Heat</div>
-              <div className="font-display text-base text-forest-50">High</div>
+              <div className="font-display text-base text-forest-50">
+                {HERO_DEMO_SCORES.heat}
+              </div>
             </div>
           </FloatingChip>
 
@@ -301,7 +298,9 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
             <Layers size={14} className="text-aurora-violet" strokeWidth={2} />
             <div>
               <div className="font-mono-data text-[10px] uppercase tracking-wider text-forest-100/50">Grade</div>
-              <div className="font-display text-base text-glow-300">C+</div>
+              <div className="font-display text-base text-glow-300">
+                {HERO_DEMO_SCORES.grade}
+              </div>
             </div>
           </FloatingChip>
         </div>

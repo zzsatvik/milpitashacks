@@ -1,4 +1,4 @@
-import type { LawnAnalysis } from "@lawn-audit/shared";
+import type { LawnAnalysis } from "@terraview/shared";
 import { insforge } from "./insforge";
 
 export interface SavedAudit {

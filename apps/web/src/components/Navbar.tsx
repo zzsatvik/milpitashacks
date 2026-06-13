@@ -41,7 +41,7 @@ export function Navbar({ showDemoBadge, onNavigate }: NavbarProps) {
             </span>
             <div className="flex flex-col leading-none">
               <span className="font-display text-[1.05rem] tracking-tight-display text-forest-50">
-                Lawn<span className="text-glow-400">.</span>Audit
+                Terra<span className="text-glow-400">view</span>
               </span>
               <span className="mt-0.5 hidden font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40 sm:block">
                 Sustainability vision

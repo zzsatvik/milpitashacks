@@ -1,5 +1,5 @@
-import type { LawnZone } from "@lawn-audit/shared";
-import { SEVERITY_COLORS } from "@lawn-audit/shared";
+import type { LawnZone } from "@terraview/shared";
+import { SEVERITY_COLORS } from "@terraview/shared";
 import { ActionPlanDetails } from "./ActionPlanDetails";
 import { Close, Droplet, Sprout } from "./Icons";
 

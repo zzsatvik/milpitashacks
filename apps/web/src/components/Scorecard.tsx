@@ -1,4 +1,4 @@
-import type { LawnScores, RiskLevel } from "@lawn-audit/shared";
+import type { LawnScores, RiskLevel } from "@terraview/shared";
 import { Droplet, Sprout, Sun, Recycle, Mountain } from "./Icons";
 
 interface ScorecardProps {

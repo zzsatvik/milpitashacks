@@ -1,4 +1,4 @@
-import type { ZoneActionPlan } from "@lawn-audit/shared";
+import type { ZoneActionPlan } from "@terraview/shared";
 import { Compass, Droplet } from "./Icons";
 
 interface ActionPlanDetailsProps {

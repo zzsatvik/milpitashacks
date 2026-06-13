@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LawnZone } from "@lawn-audit/shared";
-import { SEVERITY_COLORS } from "@lawn-audit/shared";
+import type { LawnZone } from "@terraview/shared";
+import { SEVERITY_COLORS } from "@terraview/shared";
 import type { ViewTab } from "../types";
 
 interface LawnCanvasProps {

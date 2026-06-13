@@ -1,5 +1,5 @@
 {
-  "name": "@lawn-audit/web",
+  "name": "@terraview/web",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@insforge/sdk": "^1.4.0",
-    "@lawn-audit/shared": "*",
+    "@terraview/shared": "*",
     "jspdf": "^4.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

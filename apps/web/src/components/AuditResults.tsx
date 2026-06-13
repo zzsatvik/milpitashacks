@@ -1,4 +1,4 @@
-import type { LawnAnalysis } from "@lawn-audit/shared";
+import type { LawnAnalysis } from "@terraview/shared";
 import { useMemo, useState } from "react";
 import { exportAuditPdf } from "../lib/exportPdf";
 import { LawnCanvas } from "./LawnCanvas";

@@ -1,4 +1,4 @@
-import type { LawnAnalysis } from "@lawn-audit/shared";
+import type { LawnAnalysis } from "@terraview/shared";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 

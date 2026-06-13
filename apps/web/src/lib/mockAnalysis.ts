@@ -1,4 +1,4 @@
-import type { LawnAnalysis, ZoneActionPlan } from "@lawn-audit/shared";
+import type { LawnAnalysis, ZoneActionPlan } from "@terraview/shared";
 
 const turfPlan = (zip: string): ZoneActionPlan => ({
   steps: [

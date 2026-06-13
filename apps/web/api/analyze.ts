@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { callOpenAiAnalyze } from "@lawn-audit/shared";
+import { callOpenAiAnalyze } from "@terraview/shared";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {

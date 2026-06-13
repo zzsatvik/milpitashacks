@@ -1,4 +1,4 @@
-import type { LawnAnalysis, LawnZone, ZoneActionPlan } from "@lawn-audit/shared";
+import type { LawnAnalysis, LawnZone, ZoneActionPlan } from "@terraview/shared";
 import { jsPDF } from "jspdf";
 
 function addWrappedText(
@@ -138,7 +138,7 @@ export function exportAuditPdf(analysis: LawnAnalysis, zipCode?: string) {
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
-  doc.text("Lawn Audit Report", margin, y);
+  doc.text("Terraview Report", margin, y);
   y += 8;
 
   doc.setFont("helvetica", "normal");
@@ -231,5 +231,5 @@ export function exportAuditPdf(analysis: LawnAnalysis, zipCode?: string) {
   );
 
   const slug = loc ?? "report";
-  doc.save(`lawn-audit-${slug}-${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`terraview-${slug}-${new Date().toISOString().slice(0, 10)}.pdf`);
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { LawnAnalysis } from "@lawn-audit/shared";
+import type { LawnAnalysis } from "@terraview/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchUserAudits, type SavedAudit } from "../lib/audits";
 import { ChevronRight, Clock } from "./Icons";
