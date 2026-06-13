@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Crosshair, Layers, Droplet, Sprout, Sun, Sparkles } from "./Icons";
+import { ArrowRight, Layers, Droplet, Sprout, Sun, Sparkles } from "./Icons";
 
 interface HeroProps {
   onUploadClick: () => void;
@@ -70,8 +70,6 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
 
   return (
     <section className="relative pt-12 pb-20 md:pt-20 md:pb-28">
-      {/* ambient grid backdrop */}
-      <div className="hero-grid-bg pointer-events-none absolute inset-0 -z-10" />
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16">
         {/* LEFT — copy + CTAs */}
@@ -229,28 +227,6 @@ export function Hero({ onUploadClick, onTryDemo }: HeroProps) {
                 </div>
               );
             })}
-
-            {/* scan-line subtle */}
-            <div
-              className="pointer-events-none absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-glow-400 to-transparent opacity-70"
-              style={{
-                top: `${pointer.active ? pointer.y : 50}%`,
-                boxShadow: "0 0 16px rgba(163, 230, 53, 0.7)",
-                transition: pointer.active ? "top 0.05s linear" : "top 0.6s ease-out",
-              }}
-            />
-
-            {/* crosshair reticle following pointer */}
-            <div
-              className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300"
-              style={{
-                left: `${pointer.x}%`,
-                top: `${pointer.y}%`,
-                opacity: pointer.active ? 1 : 0,
-              }}
-            >
-              <Crosshair size={56} className="reticle text-glow-400" strokeWidth={1.2} />
-            </div>
 
             {/* readout HUD top-right */}
             <div

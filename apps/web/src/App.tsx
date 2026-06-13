@@ -183,7 +183,7 @@ function App() {
               )}
             </section>
 
-            {/* Process explainer — three bento cards, no emojis */}
+            {/* Process explainer */}
             <section
               id="how-it-works"
               className="scroll-mt-24 mx-auto max-w-6xl px-6 py-14"

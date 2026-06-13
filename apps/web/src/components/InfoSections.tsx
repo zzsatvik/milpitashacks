@@ -1,34 +1,48 @@
+import type { ReactNode } from "react";
+import { Droplet, Layers, Mountain, Recycle, Sprout, Sun } from "./Icons";
+
 export function ScoringSection() {
-  const metrics = [
+  const metrics: {
+    name: string;
+    range: string;
+    desc: string;
+    icon: ReactNode;
+    color: string;
+  }[] = [
     {
       name: "Water efficiency",
       range: "0–100",
       desc: "How much of your landscape relies on irrigation vs. drought-tolerant or native planting. Lower turf coverage usually means a higher score.",
-      icon: "💧",
+      icon: <Droplet size={22} strokeWidth={1.5} />,
+      color: "text-aurora-cyan",
     },
     {
       name: "Biodiversity",
       range: "0–100",
       desc: "Variety of plant types, native species, and habitat value. Monoculture lawns score low; mixed native beds score high.",
-      icon: "🌿",
+      icon: <Sprout size={22} strokeWidth={1.5} />,
+      color: "text-glow-400",
     },
     {
       name: "Heat island risk",
       range: "Low · Medium · High",
       desc: "Hardscape and bare soil absorb heat. More shade trees, mulch, and living ground cover reduce surface temperatures.",
-      icon: "🌡️",
+      icon: <Sun size={22} strokeWidth={1.5} />,
+      color: "text-aurora-amber",
     },
     {
       name: "Carbon sequestration",
       range: "Low · Medium · High",
       desc: "Trees and deep-rooted perennials pull CO₂ from the air. Turf sequesters little; oaks and native shrubs sequester significantly more.",
-      icon: "🌱",
+      icon: <Mountain size={22} strokeWidth={1.5} />,
+      color: "text-forest-300",
     },
     {
       name: "Soil health",
       range: "Low · Medium · High",
       desc: "Bare patches erode and lose carbon. Mulched beds, ground cover, and reduced compaction improve retention and microbial life.",
-      icon: "♻️",
+      icon: <Recycle size={22} strokeWidth={1.5} />,
+      color: "text-aurora-violet",
     },
   ];
 
@@ -58,7 +72,11 @@ export function ScoringSection() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {metrics.map((m) => (
           <div key={m.name} className="bento glass rounded-3xl p-6">
-            <span className="text-xl">{m.icon}</span>
+            <div
+              className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 ${m.color}`}
+            >
+              {m.icon}
+            </div>
             <h3 className="mt-3 font-display text-xl tracking-tight-display text-forest-50">
               {m.name}
             </h3>
@@ -72,7 +90,9 @@ export function ScoringSection() {
         ))}
 
         <div className="bento glass rounded-3xl p-6 md:col-span-2 lg:col-span-1">
-          <span className="text-xl">📊</span>
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-glow-300">
+            <Layers size={22} strokeWidth={1.5} />
+          </div>
           <h3 className="mt-3 font-display text-xl tracking-tight-display text-forest-50">
             Overall grade
           </h3>
