@@ -1,9 +1,13 @@
 import { useCallback, useState } from "react";
 import type { LawnAnalysis } from "@lawn-audit/shared";
 import { AnalyzingScreen } from "./components/AnalyzingScreen";
+import { AuditHistory } from "./components/AuditHistory";
 import { AuditResults } from "./components/AuditResults";
+import { Navbar } from "./components/Navbar";
 import { PhotoUpload } from "./components/PhotoUpload";
+import { useAuth } from "./contexts/AuthContext";
 import { analyzeLawnImage, urlToDataUrl } from "./lib/analyzeLawn";
+import { saveAudit } from "./lib/audits";
 import { MOCK_ANALYSIS } from "./lib/mockAnalysis";
 import type { AppPhase } from "./types";
 import { useMockMode } from "./lib/env";
@@ -11,29 +15,41 @@ import { useMockMode } from "./lib/env";
 const USE_MOCK = useMockMode();
 
 function App() {
+  const { user } = useAuth();
   const [phase, setPhase] = useState<AppPhase>("landing");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<LawnAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [savedReplay, setSavedReplay] = useState(false);
 
-  const runAnalysis = useCallback(async (dataUrl: string) => {
-    setPhase("analyzing");
-    setError(null);
+  const runAnalysis = useCallback(
+    async (dataUrl: string) => {
+      setPhase("analyzing");
+      setError(null);
+      setSavedReplay(false);
 
-    try {
-      if (USE_MOCK) {
-        await new Promise((r) => setTimeout(r, 2500));
-        setAnalysis(MOCK_ANALYSIS);
-      } else {
-        const result = await analyzeLawnImage(dataUrl);
+      try {
+        let result: LawnAnalysis;
+        if (USE_MOCK) {
+          await new Promise((r) => setTimeout(r, 2500));
+          result = MOCK_ANALYSIS;
+        } else {
+          result = await analyzeLawnImage(dataUrl);
+        }
+
         setAnalysis(result);
+        setPhase("results");
+
+        if (user) {
+          saveAudit(user.id, result);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Analysis failed");
+        setPhase("landing");
       }
-      setPhase("results");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Analysis failed");
-      setPhase("landing");
-    }
-  }, []);
+    },
+    [user],
+  );
 
   const handleUpload = useCallback(
     (_file: File, dataUrl: string) => {
@@ -54,36 +70,30 @@ function App() {
     }
   }, [runAnalysis]);
 
+  const handleLoadSavedAudit = useCallback(async (saved: LawnAnalysis) => {
+    setAnalysis(saved);
+    setSavedReplay(true);
+    try {
+      const dataUrl = await urlToDataUrl("/demo-yard.jpg");
+      setImageUrl(dataUrl);
+    } catch {
+      setImageUrl("/demo-yard.jpg");
+    }
+    setPhase("results");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const handleStartOver = () => {
     setPhase("landing");
     setImageUrl(null);
     setAnalysis(null);
     setError(null);
+    setSavedReplay(false);
   };
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-forest-200/60 bg-white/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🌿</span>
-            <div>
-              <h1 className="font-display text-xl font-semibold text-forest-900">
-                Lawn Audit
-              </h1>
-              <p className="text-xs text-forest-500">
-                AI-powered yard sustainability analysis
-              </p>
-            </div>
-          </div>
-          {USE_MOCK && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
-              Demo mode
-            </span>
-          )}
-        </div>
-      </header>
+      <Navbar showDemoBadge={USE_MOCK} />
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         {phase === "landing" && (
@@ -138,17 +148,26 @@ function App() {
                 desc="See before & after with water & carbon impact estimates"
               />
             </section>
+
+            <AuditHistory onLoadAudit={handleLoadSavedAudit} />
           </div>
         )}
 
         {phase === "analyzing" && <AnalyzingScreen imageUrl={imageUrl} />}
 
         {phase === "results" && imageUrl && analysis && (
-          <AuditResults
-            imageUrl={imageUrl}
-            analysis={analysis}
-            onStartOver={handleStartOver}
-          />
+          <>
+            {savedReplay && (
+              <p className="mb-4 rounded-lg bg-forest-100 px-4 py-2 text-sm text-forest-700">
+                Viewing a saved audit — zone layout shown on sample photo
+              </p>
+            )}
+            <AuditResults
+              imageUrl={imageUrl}
+              analysis={analysis}
+              onStartOver={handleStartOver}
+            />
+          </>
         )}
       </main>
     </div>

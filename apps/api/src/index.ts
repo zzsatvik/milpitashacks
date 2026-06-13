@@ -14,7 +14,12 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: (origin) => {
+      if (!origin) return origin;
+      if (/^http:\/\/localhost:\d+$/.test(origin)) return origin;
+      if (/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) return origin;
+      return null;
+    },
   }),
 );
 
