@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { LawnAnalysis } from "@lawn-audit/shared";
 import { AnalyzingScreen } from "./components/AnalyzingScreen";
 import { AuditHistory } from "./components/AuditHistory";
 import { AuditResults } from "./components/AuditResults";
+import { Hero } from "./components/Hero";
 import { Navbar } from "./components/Navbar";
 import { PhotoUpload } from "./components/PhotoUpload";
+import { Aperture, Layers, Idea, Sparkles } from "./components/Icons";
 import { useAuth } from "./contexts/AuthContext";
 import { analyzeLawnImage, urlToDataUrl } from "./lib/analyzeLawn";
 import { saveAudit } from "./lib/audits";
@@ -21,6 +23,7 @@ function App() {
   const [analysis, setAnalysis] = useState<LawnAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedReplay, setSavedReplay] = useState(false);
+  const uploadRef = useRef<HTMLDivElement>(null);
 
   const runAnalysis = useCallback(
     async (dataUrl: string) => {
@@ -91,75 +94,119 @@ function App() {
     setSavedReplay(false);
   };
 
+  const scrollToUpload = () => {
+    uploadRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   return (
-    <div className="min-h-screen">
+    <div className="app-shell min-h-screen">
       <Navbar showDemoBadge={USE_MOCK} />
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main>
         {phase === "landing" && (
-          <div className="animate-fade-up">
-            <section className="mb-10 text-center">
-              <h2 className="font-display text-4xl leading-tight text-forest-900 md:text-5xl">
-                Know your lawn&apos;s
-                <br />
-                <span className="text-forest-600">environmental footprint</span>
-              </h2>
-              <p className="mx-auto mt-4 max-w-xl text-lg text-forest-600">
-                Upload a photo of your yard. Our AI maps every zone, scores
-                water use and biodiversity, and shows you exactly what to change.
-              </p>
-            </section>
+          <div className="animate-fade-in">
+            <Hero onUploadClick={scrollToUpload} onTryDemo={handleTryDemo} />
 
-            <div className="mx-auto max-w-xl">
-              <PhotoUpload onUpload={handleUpload} />
-              <div className="mt-4 flex items-center gap-3">
-                <div className="h-px flex-1 bg-forest-200" />
-                <span className="text-xs font-medium text-forest-500">or</span>
-                <div className="h-px flex-1 bg-forest-200" />
+            {/* Upload + section */}
+            <section
+              ref={uploadRef}
+              id="upload"
+              className="mx-auto max-w-3xl px-6 pb-10 pt-4"
+            >
+              <div className="mb-6 text-center">
+                <div className="inline-flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
+                  <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
+                  Step 01
+                </div>
+                <h2 className="mt-2 font-display text-3xl tracking-tight-display text-forest-50 sm:text-4xl">
+                  Drop in a yard photo
+                </h2>
+                <p className="mx-auto mt-2 max-w-md text-sm text-forest-100/55">
+                  Any angle works. One photo is all we need to start mapping zones.
+                </p>
               </div>
+
+              <PhotoUpload onUpload={handleUpload} />
+
+              <div className="mt-5 flex items-center gap-3">
+                <div className="h-px flex-1 bg-white/8" />
+                <span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
+                  or
+                </span>
+                <div className="h-px flex-1 bg-white/8" />
+              </div>
+
               <button
                 type="button"
                 onClick={handleTryDemo}
-                className="mt-4 w-full rounded-xl border border-forest-300 bg-white/80 px-4 py-3 text-sm font-semibold text-forest-800 transition hover:border-forest-400 hover:bg-white hover:shadow-sm"
+                className="glass-subtle group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-medium text-forest-100/85 transition hover:border-glow-400/30 hover:text-forest-50"
               >
-                Try with a sample yard photo →
+                <Sparkles size={15} className="text-glow-400" strokeWidth={1.8} />
+                Run on a sample yard
+                <span className="ml-1 text-forest-100/40 transition group-hover:text-glow-300">→</span>
               </button>
+
               {error && (
-                <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                <p className="mt-4 rounded-xl border border-red-400/25 bg-red-400/10 px-4 py-3 text-sm text-red-300">
                   {error}
                 </p>
               )}
-            </div>
-
-            <section className="mt-16 grid gap-6 sm:grid-cols-3">
-              <FeatureCard
-                icon="📸"
-                title="Snap & upload"
-                desc="One photo from your yard — that's all we need"
-              />
-              <FeatureCard
-                icon="🔍"
-                title="AI zone mapping"
-                desc="GPT-4o Vision identifies turf, natives, hardscape & more"
-              />
-              <FeatureCard
-                icon="💡"
-                title="Actionable swaps"
-                desc="See before & after with water & carbon impact estimates"
-              />
             </section>
 
-            <AuditHistory onLoadAudit={handleLoadSavedAudit} />
+            {/* Process explainer — three bento cards, no emojis */}
+            <section className="mx-auto max-w-6xl px-6 py-14">
+              <div className="mb-10 text-center">
+                <div className="inline-flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
+                  <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
+                  How it works
+                </div>
+                <h2 className="mt-2 font-display text-3xl tracking-tight-display text-forest-50 sm:text-4xl text-balance">
+                  From snapshot to <em className="italic text-glow-300">science</em> in&nbsp;seconds.
+                </h2>
+              </div>
+
+              <div className="grid gap-5 stagger md:grid-cols-3">
+                <BentoCard
+                  step="01"
+                  icon={<Aperture size={22} strokeWidth={1.4} />}
+                  title="Capture"
+                  desc="One photo of your yard. Phone camera is more than enough resolution."
+                />
+                <BentoCard
+                  step="02"
+                  icon={<Layers size={22} strokeWidth={1.4} />}
+                  title="Decode"
+                  desc="A vision-tuned machine learning model segments turf, natives, hardscape, and bare soil into zones."
+                />
+                <BentoCard
+                  step="03"
+                  icon={<Idea size={22} strokeWidth={1.4} />}
+                  title="Act"
+                  desc="See water, carbon, and biodiversity impact for every recommended swap."
+                />
+              </div>
+            </section>
+
+            <div className="mx-auto max-w-6xl px-6">
+              <AuditHistory onLoadAudit={handleLoadSavedAudit} />
+            </div>
+
+            <Footer />
           </div>
         )}
 
-        {phase === "analyzing" && <AnalyzingScreen imageUrl={imageUrl} />}
+        {phase === "analyzing" && (
+          <div className="mx-auto max-w-6xl px-6">
+            <AnalyzingScreen imageUrl={imageUrl} />
+          </div>
+        )}
 
         {phase === "results" && imageUrl && analysis && (
-          <>
+          <div className="mx-auto max-w-6xl px-6">
             {savedReplay && (
-              <p className="mb-4 rounded-lg bg-forest-100 px-4 py-2 text-sm text-forest-700">
-                Viewing a saved audit — zone layout shown on sample photo
+              <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-glow-400/25 bg-glow-400/8 px-3 py-1.5 font-mono-data text-[10px] uppercase tracking-[0.14em] text-glow-300">
+                <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
+                Replay&nbsp;·&nbsp;Layout shown on sample photo
               </p>
             )}
             <AuditResults
@@ -167,28 +214,53 @@ function App() {
               analysis={analysis}
               onStartOver={handleStartOver}
             />
-          </>
+          </div>
         )}
       </main>
     </div>
   );
 }
 
-function FeatureCard({
+function BentoCard({
+  step,
   icon,
   title,
   desc,
 }: {
-  icon: string;
+  step: string;
+  icon: React.ReactNode;
   title: string;
   desc: string;
 }) {
   return (
-    <div className="rounded-2xl border border-forest-200/60 bg-white/50 p-6 text-center">
-      <span className="text-3xl">{icon}</span>
-      <h3 className="mt-3 font-display text-lg text-forest-800">{title}</h3>
-      <p className="mt-1 text-sm text-forest-600">{desc}</p>
+    <div className="bento glass relative overflow-hidden rounded-3xl p-7">
+      <div className="absolute right-5 top-5 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/35">
+        {step}
+      </div>
+      <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-glow-400/20 bg-glow-400/8 text-glow-300">
+        {icon}
+      </div>
+      <h3 className="mt-5 font-display text-2xl tracking-tight-display text-forest-50">
+        {title}
+      </h3>
+      <p className="mt-1.5 text-sm leading-relaxed text-forest-100/60">{desc}</p>
     </div>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="mx-auto mt-20 max-w-6xl border-t border-white/5 px-6 py-10">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
+          <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
+          Lawn.Audit&nbsp;·&nbsp;Built for measurable biodiversity
+        </div>
+        <div className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/30">
+          v0.1
+        </div>
+      </div>
+    </footer>
   );
 }
 

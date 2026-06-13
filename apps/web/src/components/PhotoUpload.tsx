@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { Upload } from "./Icons";
 
 interface PhotoUploadProps {
   onUpload: (file: File, dataUrl: string) => void;
@@ -38,15 +39,21 @@ export function PhotoUpload({ onUpload, disabled }: PhotoUploadProps) {
         if (file) handleFile(file);
       }}
       className={`
-        relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center
+        glass relative cursor-pointer overflow-hidden rounded-3xl p-10 text-center
         transition-all duration-300
         ${dragOver
-          ? "border-forest-500 bg-forest-50 scale-[1.01]"
-          : "border-forest-300/60 bg-white/60 hover:border-forest-400 hover:bg-white/80"
+          ? "border-glow-400/50 [box-shadow:0_0_0_4px_rgba(163,230,53,0.12),inset_0_1px_0_0_rgba(255,255,255,0.1),0_24px_48px_-12px_rgba(0,0,0,0.5)]"
+          : "hover:border-glow-400/25"
         }
         ${disabled ? "pointer-events-none opacity-50" : ""}
       `}
     >
+      {/* corner brackets */}
+      <span className="pointer-events-none absolute left-4 top-4 h-3 w-3 border-l border-t border-glow-400/40" />
+      <span className="pointer-events-none absolute right-4 top-4 h-3 w-3 border-r border-t border-glow-400/40" />
+      <span className="pointer-events-none absolute bottom-4 left-4 h-3 w-3 border-b border-l border-glow-400/40" />
+      <span className="pointer-events-none absolute bottom-4 right-4 h-3 w-3 border-b border-r border-glow-400/40" />
+
       <input
         ref={inputRef}
         type="file"
@@ -58,17 +65,15 @@ export function PhotoUpload({ onUpload, disabled }: PhotoUploadProps) {
         }}
       />
 
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-forest-100 text-3xl">
-        📷
+      <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-glow-400/20 bg-glow-400/10 text-glow-300">
+        <Upload size={22} strokeWidth={1.7} />
       </div>
-      <p className="font-display text-xl text-forest-800">
-        Drop your yard photo here
+      <p className="font-display text-xl text-forest-50">Drop your yard photo</p>
+      <p className="mt-2 text-sm text-forest-100/55">
+        or click to browse&nbsp;&nbsp;·&nbsp;&nbsp;JPG&nbsp;·&nbsp;PNG&nbsp;·&nbsp;HEIC
       </p>
-      <p className="mt-2 text-sm text-forest-600/80">
-        or click to browse — JPG, PNG, HEIC
-      </p>
-      <p className="mt-4 text-xs text-forest-500">
-        Tip: shoot from an elevated angle to capture the full yard
+      <p className="mt-5 font-mono-data text-[10px] uppercase tracking-[0.16em] text-forest-100/35">
+        Tip — shoot from an elevated angle for full coverage
       </p>
     </div>
   );

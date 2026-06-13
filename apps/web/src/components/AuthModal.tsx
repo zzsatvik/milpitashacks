@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { Close } from "./Icons";
 
 type AuthMode = "signin" | "signup" | "verify";
 
@@ -72,153 +73,135 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-forest-950/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-forest-950/70 p-4 backdrop-blur-md"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="animate-fade-up w-full max-w-md rounded-2xl border border-forest-200 bg-white p-6 shadow-xl"
+        className="animate-fade-up glass-strong relative w-full max-w-md overflow-hidden rounded-3xl p-7"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-title"
       >
-        <div className="mb-6 flex items-start justify-between">
+        {/* aurora glow accent */}
+        <div className="pointer-events-none absolute -left-12 -top-12 h-40 w-40 rounded-full bg-glow-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -right-12 h-44 w-44 rounded-full bg-aurora-cyan/10 blur-3xl" />
+
+        <div className="relative mb-6 flex items-start justify-between">
           <div>
-            <h2 id="auth-title" className="font-display text-2xl text-forest-900">
-              {mode === "verify" ? "Verify email" : "Welcome back"}
+            <div className="mb-1.5 flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
+              <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
+              {mode === "verify" ? "Almost there" : "Sign in"}
+            </div>
+            <h2 id="auth-title" className="font-display text-3xl text-forest-50 tracking-tight-display">
+              {mode === "verify" ? "Verify your email" : "Save your work"}
             </h2>
-            <p className="mt-1 text-sm text-forest-600">
+            <p className="mt-1.5 text-sm text-forest-100/55">
               {mode === "verify"
-                ? "Enter the 6-digit code sent to your email"
-                : "Sign in to save and revisit your lawn audits"}
+                ? "Enter the 6-digit code we sent you"
+                : "Keep your audits, watch your yard improve."}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-forest-400 hover:bg-forest-50 hover:text-forest-700"
+            className="glass-subtle inline-flex h-8 w-8 items-center justify-center rounded-full text-forest-100/60 transition hover:border-white/20 hover:text-forest-50"
             aria-label="Close"
           >
-            ✕
+            <Close size={14} />
           </button>
         </div>
 
-        {mode !== "verify" && (
-          <>
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-forest-200 bg-white py-2.5 text-sm font-medium text-forest-800 transition hover:bg-forest-50 disabled:opacity-50"
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
+        <div className="relative">
+          {mode !== "verify" && (
+            <>
+              <button
+                type="button"
+                onClick={handleGoogle}
+                disabled={loading}
+                className="glass-subtle flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-forest-50 transition hover:border-white/20 disabled:opacity-50"
+              >
+                <GoogleIcon />
+                Continue with Google
+              </button>
 
-            <div className="my-5 flex items-center gap-3">
-              <div className="h-px flex-1 bg-forest-200" />
-              <span className="text-xs text-forest-500">or</span>
-              <div className="h-px flex-1 bg-forest-200" />
-            </div>
+              <div className="my-5 flex items-center gap-3">
+                <div className="h-px flex-1 bg-white/10" />
+                <span className="font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
+                  or email
+                </span>
+                <div className="h-px flex-1 bg-white/10" />
+              </div>
 
-            <div className="mb-4 flex gap-1 rounded-lg bg-forest-100 p-1">
-              {(["signin", "signup"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => {
-                    setMode(tab);
-                    setError(null);
-                  }}
-                  className={`
-                    flex-1 rounded-md py-2 text-sm font-semibold capitalize transition
-                    ${mode === tab
-                      ? "bg-white text-forest-900 shadow-sm"
-                      : "text-forest-600"
-                    }
-                  `}
-                >
-                  {tab === "signin" ? "Sign in" : "Sign up"}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+              <div className="mb-4 flex gap-1 rounded-xl border border-white/8 bg-white/[0.03] p-1">
+                {(["signin", "signup"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => {
+                      setMode(tab);
+                      setError(null);
+                    }}
+                    className={`
+                      flex-1 rounded-lg py-2 text-sm font-semibold capitalize transition
+                      ${mode === tab
+                        ? "bg-forest-50 text-forest-950 shadow-sm"
+                        : "text-forest-100/55 hover:text-forest-100"
+                      }
+                    `}
+                  >
+                    {tab === "signin" ? "Sign in" : "Sign up"}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
-        {error && (
-          <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+          {error && (
+            <p className="mb-4 rounded-xl border border-red-400/25 bg-red-400/10 px-3 py-2.5 text-sm text-red-300">
+              {error}
+            </p>
+          )}
 
-        {mode === "signin" && (
-          <form onSubmit={handleSignIn} className="space-y-3">
-            <Field
-              label="Email"
-              type="email"
-              value={email}
-              onChange={setEmail}
-              required
-            />
-            <Field
-              label="Password"
-              type="password"
-              value={password}
-              onChange={setPassword}
-              required
-            />
-            <SubmitButton loading={loading} label="Sign in" />
-          </form>
-        )}
+          {mode === "signin" && (
+            <form onSubmit={handleSignIn} className="space-y-3">
+              <Field label="Email" type="email" value={email} onChange={setEmail} required />
+              <Field label="Password" type="password" value={password} onChange={setPassword} required />
+              <SubmitButton loading={loading} label="Sign in" />
+            </form>
+          )}
 
-        {mode === "signup" && (
-          <form onSubmit={handleSignUp} className="space-y-3">
-            <Field
-              label="Name"
-              type="text"
-              value={name}
-              onChange={setName}
-              placeholder="Optional"
-            />
-            <Field
-              label="Email"
-              type="email"
-              value={email}
-              onChange={setEmail}
-              required
-            />
-            <Field
-              label="Password"
-              type="password"
-              value={password}
-              onChange={setPassword}
-              required
-            />
-            <SubmitButton loading={loading} label="Create account" />
-          </form>
-        )}
+          {mode === "signup" && (
+            <form onSubmit={handleSignUp} className="space-y-3">
+              <Field label="Name" type="text" value={name} onChange={setName} placeholder="Optional" />
+              <Field label="Email" type="email" value={email} onChange={setEmail} required />
+              <Field label="Password" type="password" value={password} onChange={setPassword} required />
+              <SubmitButton loading={loading} label="Create account" />
+            </form>
+          )}
 
-        {mode === "verify" && (
-          <form onSubmit={handleVerify} className="space-y-3">
-            <Field
-              label="Verification code"
-              type="text"
-              value={otp}
-              onChange={setOtp}
-              placeholder="123456"
-              required
-            />
-            <SubmitButton loading={loading} label="Verify & sign in" />
-            <button
-              type="button"
-              onClick={() => setMode("signin")}
-              className="w-full text-sm text-forest-600 hover:text-forest-800"
-            >
-              Back to sign in
-            </button>
-          </form>
-        )}
+          {mode === "verify" && (
+            <form onSubmit={handleVerify} className="space-y-3">
+              <Field
+                label="Verification code"
+                type="text"
+                value={otp}
+                onChange={setOtp}
+                placeholder="123456"
+                required
+              />
+              <SubmitButton loading={loading} label="Verify & sign in" />
+              <button
+                type="button"
+                onClick={() => setMode("signin")}
+                className="w-full text-sm text-forest-100/55 transition hover:text-forest-50"
+              >
+                Back to sign in
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -241,7 +224,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-forest-700">
+      <span className="mb-1 block font-mono-data text-[10px] uppercase tracking-[0.16em] text-forest-100/55">
         {label}
       </span>
       <input
@@ -250,7 +233,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className="w-full rounded-lg border border-forest-200 px-3 py-2.5 text-sm text-forest-900 outline-none transition focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="input-glass w-full rounded-xl px-3.5 py-2.5 text-sm"
       />
     </label>
   );
@@ -267,7 +250,7 @@ function SubmitButton({
     <button
       type="submit"
       disabled={loading}
-      className="w-full rounded-xl bg-forest-600 py-2.5 text-sm font-semibold text-white transition hover:bg-forest-700 disabled:opacity-50"
+      className="mt-2 w-full rounded-xl bg-glow-400 py-3 text-sm font-semibold text-forest-950 shadow-[0_8px_24px_-4px_rgba(163,230,53,0.45)] transition hover:bg-glow-300 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {loading ? "Please wait…" : label}
     </button>

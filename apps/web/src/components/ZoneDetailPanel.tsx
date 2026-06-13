@@ -1,5 +1,6 @@
 import type { LawnZone } from "@lawn-audit/shared";
 import { SEVERITY_COLORS } from "@lawn-audit/shared";
+import { Close, Droplet, Sprout } from "./Icons";
 
 interface ZoneDetailPanelProps {
   zone: LawnZone | null;
@@ -12,49 +13,67 @@ export function ZoneDetailPanel({ zone, onClose }: ZoneDetailPanelProps) {
   const colors = SEVERITY_COLORS[zone.severity];
 
   return (
-    <div className="animate-fade-up rounded-2xl border border-forest-200 bg-white p-5 shadow-lg">
-      <div className="mb-3 flex items-start justify-between gap-3">
+    <div className="animate-fade-up glass rounded-3xl p-6">
+      <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <span
-            className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-            style={{ backgroundColor: colors.fill, color: colors.stroke }}
+            className="inline-flex items-center rounded-full border px-2.5 py-0.5 font-mono-data text-[10px] uppercase tracking-[0.12em]"
+            style={{
+              borderColor: colors.stroke + "55",
+              background: colors.fill,
+              color: colors.stroke,
+            }}
           >
             {colors.label}
           </span>
-          <h3 className="mt-1 font-display text-lg text-forest-900">
+          <h3 className="mt-2 font-display text-xl text-forest-50 tracking-tight-display">
             {zone.label}
           </h3>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-1 text-forest-400 transition hover:bg-forest-50 hover:text-forest-700"
+          className="glass-subtle inline-flex h-8 w-8 items-center justify-center rounded-full text-forest-100/60 transition hover:border-white/20 hover:text-forest-50"
           aria-label="Close"
         >
-          ✕
+          <Close size={14} />
         </button>
       </div>
 
-      <div className="space-y-3 text-sm">
-        <div>
-          <p className="font-medium text-forest-800">Issue</p>
-          <p className="text-forest-600">{zone.issue}</p>
+      <div className="space-y-4 text-sm">
+        <Section label="Issue">
+          <p className="text-forest-100/75 leading-relaxed">{zone.issue}</p>
+        </Section>
+        <Section label="Recommendation">
+          <p className="text-forest-100/75 leading-relaxed">{zone.recommendation}</p>
+        </Section>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          {zone.water_impact && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-aurora-cyan/25 bg-aurora-cyan/10 px-3 py-1.5 text-xs text-aurora-cyan">
+              <Droplet size={12} strokeWidth={2} />
+              {zone.water_impact}
+            </div>
+          )}
+          {zone.co2_impact && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-glow-400/25 bg-glow-400/10 px-3 py-1.5 text-xs text-glow-300">
+              <Sprout size={12} strokeWidth={2} />
+              {zone.co2_impact}
+            </div>
+          )}
         </div>
-        <div>
-          <p className="font-medium text-forest-800">Recommendation</p>
-          <p className="text-forest-600">{zone.recommendation}</p>
-        </div>
-        {zone.water_impact && (
-          <div className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800">
-            💧 {zone.water_impact}
-          </div>
-        )}
-        {zone.co2_impact && (
-          <div className="rounded-lg bg-green-50 px-3 py-2 text-green-800">
-            🌱 {zone.co2_impact}
-          </div>
-        )}
       </div>
+    </div>
+  );
+}
+
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="mb-1 font-mono-data text-[10px] uppercase tracking-[0.16em] text-forest-100/40">
+        {label}
+      </div>
+      {children}
     </div>
   );
 }

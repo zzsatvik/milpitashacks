@@ -97,9 +97,7 @@ export function LawnCanvas({
         const pillY = Math.max(y - pillH - 4, 4);
 
         ctx.fillStyle = colors.stroke;
-        ctx.beginPath();
-        ctx.roundRect(pillX, pillY, pillW, pillH, 4);
-        ctx.fill();
+        ctx.fillRect(pillX, pillY, pillW, pillH);
         ctx.fillStyle = "#fff";
         ctx.fillText(label, pillX + 8, pillY + 15);
       } else {
@@ -152,14 +150,18 @@ export function LawnCanvas({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-hidden rounded-xl">
+    <div ref={containerRef} className="relative w-full overflow-hidden rounded-2xl">
       <canvas
         ref={canvasRef}
         onClick={handleClick}
-        className="block w-full cursor-crosshair rounded-xl shadow-md"
+        className="block w-full cursor-crosshair rounded-2xl"
         role="img"
         aria-label="Annotated lawn photo"
       />
+      <span className="pointer-events-none absolute left-2 top-2 h-3 w-3 border-l border-t border-glow-400/60" />
+      <span className="pointer-events-none absolute right-2 top-2 h-3 w-3 border-r border-t border-glow-400/60" />
+      <span className="pointer-events-none absolute bottom-2 left-2 h-3 w-3 border-b border-l border-glow-400/60" />
+      <span className="pointer-events-none absolute bottom-2 right-2 h-3 w-3 border-b border-r border-glow-400/60" />
     </div>
   );
 }
@@ -171,17 +173,15 @@ function drawNumberBadge(
   num: number,
   selected: boolean,
 ) {
-  const r = selected ? 16 : 14;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  const s = selected ? 32 : 28;
   ctx.fillStyle = selected ? "#1a2e1f" : "#2f5236";
-  ctx.fill();
+  ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
   ctx.strokeStyle = "#fff";
   ctx.lineWidth = 2.5;
-  ctx.stroke();
+  ctx.strokeRect(cx - s / 2, cy - s / 2, s, s);
 
   ctx.fillStyle = "#fff";
-  ctx.font = `700 ${selected ? 14 : 13}px 'Source Sans 3', sans-serif`;
+  ctx.font = `700 ${selected ? 14 : 13}px 'DM Sans', sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(String(num), cx, cy + 0.5);

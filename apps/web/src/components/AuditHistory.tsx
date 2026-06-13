@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { LawnAnalysis } from "@lawn-audit/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchUserAudits, type SavedAudit } from "../lib/audits";
+import { ChevronRight, Clock } from "./Icons";
 
 interface AuditHistoryProps {
   onLoadAudit: (analysis: LawnAnalysis) => void;
@@ -29,51 +30,68 @@ export function AuditHistory({ onLoadAudit }: AuditHistoryProps) {
   if (!user) return null;
 
   return (
-    <section className="mt-12 rounded-2xl border border-forest-200/80 bg-white/70 p-6">
-      <h3 className="font-display text-xl text-forest-900">Your past audits</h3>
-      <p className="mt-1 text-sm text-forest-600">
-        Tap an audit to reload its results
-      </p>
+    <section className="glass mt-14 rounded-3xl p-7">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 font-mono-data text-[10px] uppercase tracking-[0.18em] text-forest-100/40">
+            <Clock size={11} strokeWidth={2} />
+            History
+          </div>
+          <h3 className="mt-1 font-display text-2xl tracking-tight-display text-forest-50">
+            Your past audits
+          </h3>
+          <p className="mt-1 text-sm text-forest-100/55">
+            Tap an audit to reload its results
+          </p>
+        </div>
+        {!loading && audits.length > 0 && (
+          <span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-forest-100/45">
+            {audits.length} saved
+          </span>
+        )}
+      </div>
 
       {loading ? (
-        <div className="mt-4 space-y-2">
+        <div className="mt-5 space-y-2">
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="h-16 animate-pulse rounded-xl bg-forest-100"
+              className="glass-subtle h-20 animate-pulse rounded-2xl"
             />
           ))}
         </div>
       ) : audits.length === 0 ? (
-        <p className="mt-4 text-sm text-forest-500">
-          No saved audits yet — run your first one above!
+        <p className="mt-6 rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-forest-100/45">
+          No saved audits yet — your first one will appear here.
         </p>
       ) : (
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
           {audits.map((audit) => (
             <li key={audit.id}>
               <button
                 type="button"
                 onClick={() => onLoadAudit(audit.analysis)}
-                className="flex w-full items-center justify-between gap-4 rounded-xl border border-forest-100 bg-forest-50/50 px-4 py-3 text-left transition hover:border-forest-300 hover:bg-forest-50"
+                className="bento group flex w-full items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 text-left transition hover:bg-white/[0.04]"
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-forest-900">
+                <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-glow-400/25 bg-glow-400/8 font-display text-xl font-semibold text-glow-300">
+                  {audit.overall_grade}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-forest-50">
                     {audit.summary}
                   </p>
-                  <p className="mt-0.5 text-xs text-forest-500">
+                  <p className="mt-0.5 font-mono-data text-[10px] uppercase tracking-[0.12em] text-forest-100/40">
                     {new Date(audit.created_at).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
                     })}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-lg bg-forest-600 px-3 py-1 font-display text-lg font-bold text-white">
-                  {audit.overall_grade}
-                </span>
+                <ChevronRight
+                  size={16}
+                  className="shrink-0 text-forest-100/35 transition group-hover:translate-x-0.5 group-hover:text-glow-300"
+                />
               </button>
             </li>
           ))}
