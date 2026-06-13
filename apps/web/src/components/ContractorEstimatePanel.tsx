@@ -45,7 +45,7 @@ export function ContractorEstimatePanel({
           type="button"
           onClick={loadEstimate}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-aurora-cyan transition hover:text-glow-300 disabled:opacity-50"
+          className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-aurora-cyan transition hover:text-glow-300 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ChevronRight size={14} strokeWidth={2} />
           {loading ? "Calculating estimate…" : "Get a rough cost estimate"}
@@ -59,7 +59,7 @@ export function ContractorEstimatePanel({
             <button
               type="button"
               onClick={() => setEstimate(null)}
-              className="text-xs text-forest-100/40 hover:text-forest-100/70"
+              className="cursor-pointer text-xs text-forest-100/40 hover:text-forest-100/70"
             >
               Reset
             </button>

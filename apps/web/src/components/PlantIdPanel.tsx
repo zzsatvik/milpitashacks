@@ -50,7 +50,7 @@ export function PlantIdPanel({ zone, imageUrl, zipCode }: PlantIdPanelProps) {
           type="button"
           onClick={identify}
           disabled={loading}
-          className="mt-3 inline-flex items-center gap-2 rounded-xl border border-glow-400/25 bg-glow-400/8 px-4 py-2.5 text-sm font-medium text-glow-300 transition hover:border-glow-400/40 disabled:opacity-50"
+          className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-glow-400/25 bg-glow-400/8 px-4 py-2.5 text-sm font-medium text-glow-300 transition hover:border-glow-400/40 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Sprout size={14} strokeWidth={2} />
           {loading ? "Analyzing this zone…" : "What plant is this?"}
@@ -88,7 +88,7 @@ export function PlantIdPanel({ zone, imageUrl, zipCode }: PlantIdPanelProps) {
               setResult(null);
               setCropPreview(null);
             }}
-            className="text-xs text-forest-100/40 hover:text-forest-100/70"
+            className="cursor-pointer text-xs text-forest-100/40 hover:text-forest-100/70"
           >
             Identify again
           </button>

@@ -74,7 +74,7 @@ export function SwapSuggestionsList({
                     type="button"
                     onClick={() => onZoneSelect(isSelected ? null : zone.id)}
                     className={`
-                      flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border font-display text-sm font-semibold transition
+                      flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border font-display text-sm font-semibold transition
                       ${isSelected
                         ? "border-glow-400/40 bg-glow-400 text-forest-950"
                         : "border-white/10 bg-white/5 text-forest-100/80 hover:border-glow-400/30 hover:text-glow-300"
@@ -89,7 +89,7 @@ export function SwapSuggestionsList({
                     <button
                       type="button"
                       onClick={() => onZoneSelect(isSelected ? null : zone.id)}
-                      className="w-full text-left"
+                      className="w-full cursor-pointer text-left"
                     >
                       <p className="font-display text-[1.05rem] leading-snug text-forest-50">
                         {zone.label}
@@ -130,7 +130,7 @@ export function SwapSuggestionsList({
                       <button
                         type="button"
                         onClick={() => toggleExpanded(zone.id)}
-                        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-glow-300 transition hover:text-glow-400"
+                        className="mt-3 inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-glow-300 transition hover:text-glow-400"
                         aria-expanded={isExpanded}
                       >
                         <ChevronRight
