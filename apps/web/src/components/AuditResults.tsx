@@ -1,9 +1,6 @@
 import type { AuditInsights, LawnAnalysis } from "@terraview/shared";
-import { buildMockInsights } from "@terraview/shared";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { exportAuditPdf } from "../lib/exportPdf";
-import { fetchAuditInsights } from "../lib/auditFeatures";
-import { useMockMode } from "../lib/env";
 import { AuditChatFab, AuditChatPanel } from "./AuditChatPanel";
 import { LawnCanvas } from "./LawnCanvas";
 import { Scorecard } from "./Scorecard";
@@ -17,6 +14,7 @@ import type { ViewTab } from "../types";
 interface AuditResultsProps {
   imageUrl: string;
   analysis: LawnAnalysis;
+  insights: AuditInsights | null;
   zipCode?: string;
   onStartOver: () => void;
 }
@@ -24,50 +22,16 @@ interface AuditResultsProps {
 export function AuditResults({
   imageUrl,
   analysis,
+  insights,
   zipCode,
   onStartOver,
 }: AuditResultsProps) {
-  const USE_MOCK = useMockMode();
   const effectiveZip = zipCode ?? analysis.location?.zip_code ?? "";
 
   const [activeTab, setActiveTab] = useState<ViewTab>("before");
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
   const [exporting, setExporting] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-  const [insights, setInsights] = useState<AuditInsights | null>(null);
-  const [insightsLoading, setInsightsLoading] = useState(true);
-  const [insightsError, setInsightsError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!effectiveZip || !/^\d{5}$/.test(effectiveZip)) {
-      setInsightsLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    setInsightsLoading(true);
-    setInsightsError(null);
-
-    (async () => {
-      try {
-        const data = USE_MOCK
-          ? buildMockInsights(analysis, effectiveZip)
-          : await fetchAuditInsights(analysis, effectiveZip);
-        if (!cancelled) setInsights(data);
-      } catch (err) {
-        if (!cancelled) {
-          setInsightsError(err instanceof Error ? err.message : "Insights unavailable");
-          setInsights(buildMockInsights(analysis, effectiveZip));
-        }
-      } finally {
-        if (!cancelled) setInsightsLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [analysis, effectiveZip, USE_MOCK]);
 
   const selectedZone = useMemo(
     () => analysis.zones.find((z) => z.id === selectedZoneId) ?? null,
@@ -151,19 +115,12 @@ export function AuditResults({
         </div>
       )}
 
-      {insightsLoading ? (
-        <div className="glass-subtle h-48 animate-pulse rounded-3xl" />
-      ) : insights ? (
+      {insights ? (
         <div className="grid gap-6 lg:grid-cols-2">
           <SeasonalProjectionChart projection={insights.seasonal} />
           <WaterBillEstimator analysis={analysis} benchmark={insights.zip_benchmark} />
         </div>
       ) : null}
-      {insightsError && (
-        <p className="text-xs text-forest-100/40">
-          Live insights unavailable ({insightsError}) — showing estimates.
-        </p>
-      )}
 
       <div className="glass-subtle inline-flex w-full rounded-2xl p-1 sm:w-auto">
         {(["before", "after"] as const).map((tab) => (

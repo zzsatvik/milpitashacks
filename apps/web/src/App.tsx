@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { LawnAnalysis } from "@terraview/shared";
+import type { AuditInsights, LawnAnalysis } from "@terraview/shared";
+import { buildMockInsights } from "@terraview/shared";
 import { AnalyzingScreen } from "./components/AnalyzingScreen";
 import { AuditHistory } from "./components/AuditHistory";
 import { AuditResults } from "./components/AuditResults";
@@ -14,6 +15,7 @@ import { analyzeLawnImage, urlToDataUrl } from "./lib/analyzeLawn";
 import { saveAudit, type SavedAudit } from "./lib/audits";
 import { compressImageDataUrl } from "./lib/compressImage";
 import { enrichAnalysisStores } from "./lib/enrichStores";
+import { fetchAuditInsights } from "./lib/auditFeatures";
 import { isValidZipCode, normalizeZipCode, getStoredZipCode } from "./lib/location";
 import { buildMockAnalysis } from "./lib/mockAnalysis";
 import type { AppPhase } from "./types";
@@ -26,6 +28,7 @@ function App() {
   const [phase, setPhase] = useState<AppPhase>("landing");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<LawnAnalysis | null>(null);
+  const [insights, setInsights] = useState<AuditInsights | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedReplay, setSavedReplay] = useState(false);
   const [pendingScroll, setPendingScroll] = useState<string | null>(null);
@@ -59,11 +62,27 @@ function App() {
         }
 
         if (zipForAnalysis) {
-          try {
-            result = await enrichAnalysisStores(result, zipForAnalysis);
-          } catch (storeErr) {
-            console.warn("Live store lookup unavailable:", storeErr);
-          }
+          const loadInsights = (): Promise<AuditInsights> => {
+            if (USE_MOCK) {
+              return Promise.resolve(buildMockInsights(result, zipForAnalysis));
+            }
+            return fetchAuditInsights(result, zipForAnalysis).catch((err) => {
+              console.warn("Insights unavailable:", err);
+              return buildMockInsights(result, zipForAnalysis);
+            });
+          };
+
+          const [enriched, insightsData] = await Promise.all([
+            enrichAnalysisStores(result, zipForAnalysis).catch((storeErr) => {
+              console.warn("Live store lookup unavailable:", storeErr);
+              return result;
+            }),
+            loadInsights(),
+          ]);
+          result = enriched;
+          setInsights(insightsData);
+        } else {
+          setInsights(null);
         }
 
         setAnalysis(result);
@@ -120,14 +139,23 @@ function App() {
     setAnalysis(saved.analysis);
     setSavedReplay(Boolean(saved.image_data));
     setImageUrl(saved.image_data ?? "/demo-yard.jpg");
+    const replayZip =
+      saved.analysis.location?.zip_code ??
+      (isValidZipCode(zipCode) ? normalizeZipCode(zipCode) : "");
+    if (/^\d{5}$/.test(replayZip)) {
+      setInsights(buildMockInsights(saved.analysis, replayZip));
+    } else {
+      setInsights(null);
+    }
     setPhase("results");
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [zipCode]);
 
   const handleStartOver = () => {
     setPhase("landing");
     setImageUrl(null);
     setAnalysis(null);
+    setInsights(null);
     setError(null);
     setSavedReplay(false);
   };
@@ -142,6 +170,7 @@ function App() {
         setPhase("landing");
         setImageUrl(null);
         setAnalysis(null);
+        setInsights(null);
         setError(null);
         setSavedReplay(false);
         setPendingScroll(sectionId);
@@ -279,6 +308,7 @@ function App() {
             <AuditResults
               imageUrl={imageUrl}
               analysis={analysis}
+              insights={insights}
               zipCode={zipCode}
               onStartOver={handleStartOver}
             />

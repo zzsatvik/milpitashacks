@@ -7,6 +7,7 @@ const STEPS = [
   { label: "Calculating water footprint", detail: "Estimating irrigation demand" },
   { label: "Estimating carbon impact",   detail: "Sequestration & heat island risk" },
   { label: "Building recommendations",   detail: "Drafting personalized swaps" },
+  { label: "Seasonal projections",     detail: "Modeling water waste & heat by month" },
 ];
 
 interface AnalyzingScreenProps {
