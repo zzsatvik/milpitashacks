@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import type { LawnAnalysis } from "@terraview/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchUserAudits, type SavedAudit } from "../lib/audits";
 import { ChevronRight, Clock } from "./Icons";
 
 interface AuditHistoryProps {
-  onLoadAudit: (analysis: LawnAnalysis) => void;
+  onLoadAudit: (saved: SavedAudit) => void;
 }
 
 export function AuditHistory({ onLoadAudit }: AuditHistoryProps) {
@@ -70,7 +69,7 @@ export function AuditHistory({ onLoadAudit }: AuditHistoryProps) {
             <li key={audit.id}>
               <button
                 type="button"
-                onClick={() => onLoadAudit(audit.analysis)}
+                onClick={() => onLoadAudit(audit)}
                 className="bento group flex w-full items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 text-left transition hover:bg-white/[0.04]"
               >
                 <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-glow-400/25 bg-glow-400/8 font-display text-xl font-semibold text-glow-300">

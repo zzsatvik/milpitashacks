@@ -7,12 +7,14 @@ export interface SavedAudit {
   summary: string;
   overall_grade: string;
   analysis: LawnAnalysis;
+  image_data?: string | null;
   created_at: string;
 }
 
 export async function saveAudit(
   userId: string,
   analysis: LawnAnalysis,
+  imageData?: string,
 ): Promise<SavedAudit | null> {
   if (!insforge) return null;
 
@@ -23,6 +25,7 @@ export async function saveAudit(
       summary: analysis.summary,
       overall_grade: analysis.scores.overall_grade,
       analysis,
+      ...(imageData ? { image_data: imageData } : {}),
     })
     .select()
     .single();
@@ -42,7 +45,7 @@ export async function fetchUserAudits(
 
   const { data, error } = await insforge.database
     .from("lawn_audits")
-    .select("id, user_id, summary, overall_grade, analysis, created_at")
+    .select("id, user_id, summary, overall_grade, analysis, image_data, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(20);

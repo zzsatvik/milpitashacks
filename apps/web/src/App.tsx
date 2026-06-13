@@ -11,7 +11,9 @@ import { ZipCodeField } from "./components/ZipCodeField";
 import { Aperture, Layers, Idea, Sparkles } from "./components/Icons";
 import { useAuth } from "./contexts/AuthContext";
 import { analyzeLawnImage, urlToDataUrl } from "./lib/analyzeLawn";
-import { saveAudit } from "./lib/audits";
+import { saveAudit, type SavedAudit } from "./lib/audits";
+import { compressImageDataUrl } from "./lib/compressImage";
+import { enrichAnalysisStores } from "./lib/enrichStores";
 import { isValidZipCode, normalizeZipCode, getStoredZipCode } from "./lib/location";
 import { buildMockAnalysis } from "./lib/mockAnalysis";
 import type { AppPhase } from "./types";
@@ -56,11 +58,21 @@ function App() {
           result = await analyzeLawnImage(dataUrl, zipForAnalysis);
         }
 
+        if (zipForAnalysis) {
+          try {
+            result = await enrichAnalysisStores(result, zipForAnalysis);
+          } catch (storeErr) {
+            console.warn("Live store lookup unavailable:", storeErr);
+          }
+        }
+
         setAnalysis(result);
         setPhase("results");
 
         if (user) {
-          saveAudit(user.id, result);
+          compressImageDataUrl(dataUrl)
+            .catch(() => dataUrl)
+            .then((storedImage) => saveAudit(user.id, result, storedImage));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Analysis failed");
@@ -104,15 +116,10 @@ function App() {
     }
   }, [startAnalysis, zipCode]);
 
-  const handleLoadSavedAudit = useCallback(async (saved: LawnAnalysis) => {
-    setAnalysis(saved);
-    setSavedReplay(true);
-    try {
-      const dataUrl = await urlToDataUrl("/demo-yard.jpg");
-      setImageUrl(dataUrl);
-    } catch {
-      setImageUrl("/demo-yard.jpg");
-    }
+  const handleLoadSavedAudit = useCallback((saved: SavedAudit) => {
+    setAnalysis(saved.analysis);
+    setSavedReplay(Boolean(saved.image_data));
+    setImageUrl(saved.image_data ?? "/demo-yard.jpg");
     setPhase("results");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -266,7 +273,7 @@ function App() {
             {savedReplay && (
               <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-glow-400/25 bg-glow-400/8 px-3 py-1.5 font-mono-data text-[10px] uppercase tracking-[0.14em] text-glow-300">
                 <span className="inline-block h-1 w-1 rounded-full bg-glow-400" />
-                Replay&nbsp;·&nbsp;Layout shown on sample photo
+                Saved audit replay
               </p>
             )}
             <AuditResults

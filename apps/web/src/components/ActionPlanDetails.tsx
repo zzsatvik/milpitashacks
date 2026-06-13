@@ -64,7 +64,7 @@ export function ActionPlanDetails({ plan, compact }: ActionPlanDetailsProps) {
           <ul className="mt-2 space-y-2">
             {plan.where_to_buy.map((store, i) => (
               <li
-                key={i}
+                key={store.place_id ?? `${store.store_name}-${i}`}
                 className="rounded-xl border border-aurora-cyan/15 bg-aurora-cyan/5 px-3 py-2.5"
               >
                 <div className="flex flex-wrap items-center gap-2">
@@ -82,12 +82,24 @@ export function ActionPlanDetails({ plan, compact }: ActionPlanDetailsProps) {
                 {store.notes && (
                   <p className="mt-1 text-sm text-forest-100/65">{store.notes}</p>
                 )}
+                {store.maps_url && (
+                  <a
+                    href={store.maps_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex text-xs font-medium text-aurora-cyan transition hover:text-glow-300"
+                  >
+                    Open in Google Maps →
+                  </a>
+                )}
               </li>
             ))}
           </ul>
           <p className="mt-2 flex items-start gap-1.5 text-xs text-forest-100/40">
             <Droplet size={10} className="mt-0.5 shrink-0" strokeWidth={2} />
-            Distances are estimates — confirm stock and hours before you go.
+            {plan.where_to_buy.some((s) => s.place_id)
+              ? "Live listings from Google Maps — confirm stock and hours before you go."
+              : "Distances are estimates — confirm stock and hours before you go."}
           </p>
         </section>
       )}

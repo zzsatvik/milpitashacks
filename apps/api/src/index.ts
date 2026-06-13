@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { callOpenAiAnalyze } from "@terraview/shared";
+import { callOpenAiAnalyze, enrichAnalysisWithLiveStores, type LawnAnalysis } from "@terraview/shared";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 config({ path: path.join(rootDir, ".env") });
@@ -52,6 +52,42 @@ app.post("/api/analyze", async (c) => {
     return c.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Analysis failed";
+    return c.json({ error: message }, 502);
+  }
+});
+
+app.post("/api/stores/enrich", async (c) => {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    return c.json({ error: "GOOGLE_MAPS_API_KEY not configured on server" }, 500);
+  }
+
+  let body: { analysis?: unknown; zipCode?: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Invalid JSON body" }, 400);
+  }
+
+  const zipCode =
+    typeof body.zipCode === "string" ? body.zipCode.trim().slice(0, 10) : "";
+  if (!/^\d{5}$/.test(zipCode)) {
+    return c.json({ error: "Expected { analysis, zipCode: 5-digit US ZIP }" }, 400);
+  }
+
+  if (!body.analysis || typeof body.analysis !== "object") {
+    return c.json({ error: "Expected analysis object" }, 400);
+  }
+
+  try {
+    const result = await enrichAnalysisWithLiveStores(
+      body.analysis as LawnAnalysis,
+      zipCode,
+      apiKey,
+    );
+    return c.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Store lookup failed";
     return c.json({ error: message }, 502);
   }
 });

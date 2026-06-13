@@ -20,6 +20,8 @@ export interface StoreOption {
   distance?: string;
   address_hint?: string;
   notes?: string;
+  maps_url?: string;
+  place_id?: string;
 }
 
 export interface ZoneActionPlan {

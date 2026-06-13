@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS lawn_audits (
   summary TEXT NOT NULL,
   overall_grade TEXT NOT NULL,
   analysis JSONB NOT NULL,
+  image_data TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

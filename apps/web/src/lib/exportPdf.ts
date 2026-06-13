@@ -22,6 +22,22 @@ function ensureSpace(doc: jsPDF, y: number, needed: number): number {
   return y;
 }
 
+function imageFormatFromDataUrl(dataUrl: string): "JPEG" | "PNG" {
+  if (dataUrl.startsWith("data:image/png")) return "PNG";
+  return "JPEG";
+}
+
+async function loadImageSize(
+  imageUrl: string,
+): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => reject(new Error("Could not load image for PDF"));
+    img.src = imageUrl;
+  });
+}
+
 function writeActionPlan(
   doc: jsPDF,
   plan: ZoneActionPlan,
@@ -63,6 +79,7 @@ function writeActionPlan(
       store.distance ? store.distance : null,
       store.address_hint,
       store.notes,
+      store.maps_url ? "Google Maps listing" : null,
     ].filter(Boolean);
     cy = addWrappedText(doc, `• ${parts.join(" — ")}`, x + 2, cy, maxWidth - 2, 4);
     cy += 2;
@@ -130,7 +147,11 @@ function writeZone(doc: jsPDF, zone: LawnZone, index: number, y: number): number
   return cy + 4;
 }
 
-export function exportAuditPdf(analysis: LawnAnalysis, zipCode?: string) {
+export async function exportAuditPdf(
+  analysis: LawnAnalysis,
+  zipCode?: string,
+  imageUrl?: string,
+) {
   const doc = new jsPDF({ unit: "mm", format: "letter" });
   const margin = 14;
   const maxWidth = 182;
@@ -159,6 +180,30 @@ export function exportAuditPdf(analysis: LawnAnalysis, zipCode?: string) {
   }
   doc.setTextColor(0);
   y += 4;
+
+  if (imageUrl) {
+    try {
+      const { width, height } = await loadImageSize(imageUrl);
+      const imgWidth = maxWidth;
+      const imgHeight = (height / width) * imgWidth;
+      y = ensureSpace(doc, y, imgHeight + 10);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("Audited photo", margin, y);
+      y += 5;
+      doc.addImage(
+        imageUrl,
+        imageFormatFromDataUrl(imageUrl),
+        margin,
+        y,
+        imgWidth,
+        imgHeight,
+      );
+      y += imgHeight + 8;
+    } catch {
+      // Continue without photo if embedding fails
+    }
+  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
@@ -225,7 +270,7 @@ export function exportAuditPdf(analysis: LawnAnalysis, zipCode?: string) {
   doc.setTextColor(120);
   y = ensureSpace(doc, y, 10);
   doc.text(
-    "Store distances are estimates for planning. Verify inventory and hours before visiting.",
+    "Store listings sourced from Google Maps when available. Verify inventory and hours before visiting.",
     margin,
     y,
   );

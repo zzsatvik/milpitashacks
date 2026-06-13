@@ -30,10 +30,10 @@ export function AuditResults({
     [analysis.zones, selectedZoneId],
   );
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     setExporting(true);
     try {
-      exportAuditPdf(analysis, zipCode ?? analysis.location?.zip_code);
+      await exportAuditPdf(analysis, zipCode ?? analysis.location?.zip_code, imageUrl);
     } finally {
       setExporting(false);
     }
